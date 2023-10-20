@@ -1,12 +1,12 @@
 const Discord = require("discord.js");
-const GatewayIntentBits = require("discord.js");
+// const GatewayIntentBits = require("discord.js");
 const config = require("./config.json");
 const botToken = require("./TokenConfig.json");
 const client = new Discord.Client({
 	intents:
 		[
 			Discord.GatewayIntentBits.Guilds,
-			Discord.GatewayIntentBits.GuildMessage,
+			Discord.GatewayIntentBits.GuildMessages,
 			Discord.GatewayIntentBits.MessageContent,
 			Discord.GatewayIntentBits.GuildMembers
 		]
