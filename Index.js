@@ -1,14 +1,13 @@
-const Discord = require("discord.js");
-// const GatewayIntentBits = require("discord.js");
+const discord = require("discord.js");
 const config = require("./config.json");
 const botToken = require("./TokenConfig.json");
-const client = new Discord.Client({
+const client = new discord.Client({
 	intents:
 		[
-			Discord.GatewayIntentBits.Guilds,
-			Discord.GatewayIntentBits.GuildMessages,
-			Discord.GatewayIntentBits.MessageContent,
-			Discord.GatewayIntentBits.GuildMembers
+			discord.GatewayIntentBits.Guilds,
+			discord.GatewayIntentBits.GuildMessages,
+			discord.GatewayIntentBits.MessageContent,
+			discord.GatewayIntentBits.GuildMembers
 		]
 });
 
@@ -26,9 +25,4 @@ client.on("messageCreate", function (message) {
 		message.react("🧀");
 		message.channel.send(config.CHEESE_Tenor);
 	}
-
 });
-
-function Logout() {
-	client.Logout();
-}
