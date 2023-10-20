@@ -1,15 +1,18 @@
-const discord = require("discord.js");
+const Discord = require("discord.js");
+const GatewayIntentBits = require("discord.js");
 const config = require("./config.json");
 const botToken = require("./TokenConfig.json");
-const client = new discord.Client({
-	intents: [
-		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
-		GatewayIntentBits.GuildMembers]
+const client = new Discord.Client({
+	intents:
+		[
+			Discord.GatewayIntentBits.Guilds,
+			Discord.GatewayIntentBits.GuildMessage,
+			Discord.GatewayIntentBits.MessageContent,
+			Discord.GatewayIntentBits.GuildMembers
+		]
 });
 
-client.login(config.BOT_TOKEN);
+client.login(botToken.BOT_TOKEN);
 
 
 client.on("ready", function (message) {
