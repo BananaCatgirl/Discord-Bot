@@ -34,12 +34,15 @@ client.on("messageCreate", function (message) {
 
 	if (message.content.toLowerCase().includes("cheese")) {
 		message.react("🧀");
-		message.channel.send(config.CHEESE_Tenor);
+
+		if (message.startsWith("!")); {
+			message.channel.send(config.CHEESE_Tenor);
+		}
 	}
 });
 
 client.on("messageUpdate", function (message) {
-	if (message.author.bot) return;
+	if (!message.author.bot) return;
 	message.react("❤️");
 });
 
