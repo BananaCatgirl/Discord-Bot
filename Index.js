@@ -16,7 +16,7 @@ const client = new discord.Client({
 		]
 });
 client.login(botToken.BOT_TOKEN);
-
+//git credentials?
 
 client.on("ready", function (message)
 {
