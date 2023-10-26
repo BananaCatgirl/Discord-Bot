@@ -20,6 +20,7 @@ client.login(botToken.BOT_TOKEN);
 client.on("ready", function (message)
 {
 	console.log(`${client.user.username} is ready`);
+	LoadConfigs();
 	client.user.setActivity("!help", { type: discord.ActivityType.Playing });
 });
 
@@ -80,33 +81,29 @@ client.on("messageCreate", function (message)
 		if (message.author.bot) return;
 		if (message.content.startsWith(config.default_prefix))
 		{
-
 			const commandBody = message.content.slice(config.default_prefix.length);
 			const args = commandBody.split(' ');
 			const command = args.shift().toLowerCase();
-
 			if (command != 'bully') return;
-
-			if (message.author.id != 145544937423896577)
-			{
-				message.channel.send("NYI - canceling");//----------------------------------------NYI REURN
-				return;
-			}//-----------------------------------------------------------------------------------NYI REURN
 
 			if (args.length < 2)
 			{
 				message.channel.send('too few arguments! you need to set it up with this syntax:\n!bully set user@  "phrase"  channelname timeBetweenMessages(seconds)\n!bully remove user@');
 				return;
-			} else
+			}
+			else
 			{
 				try
 				{
-					if (args.length >= 4 && args[0].toLowerCase() == "set")
+					if (args[0].toLowerCase().includes("set"))
 					{
-
 						const bullyString = commandBody.split('"')[1];//----------------------TODO: Fix adding actual message
 						console.log(`bully user with string:${bullyString}`);
-						const bullyChannel = message.mentions.channels.first().id || "-1" // get the channel from the message || -1 for any channel //TODO: actually implement channel
+						const bullyChannel = "-1";
+						if (message.mentions.channels.length > 0)
+						{
+							bullyChannel = message.mentions.channels.first().id // get the channel from the message || -1 for any channel
+						}
 						// 	UserID: 2,
 						// 	annoyString: "wub wub",
 						// 	annoyChannel: "test2"
@@ -116,12 +113,14 @@ client.on("messageCreate", function (message)
 							annoyChannel: bullyChannel,
 							GuildID: message.channel.guildId
 						};
+						const ch = "all channels";
+						if (data.annoyChannel != "-1") ch = data.annoyChannel;
 						if (annoyAUserData.some(d => d.UserID == data.UserID))
 						{
 							index = annoyAUserData.findIndex(d => d.UserID == data.UserID);
 							annoyAUserData[index] = data;
-							console.log(`user overwriten: UserID: ${data.UserID}, annoyString:${data.annoyString}, annnoyChannel:${data.annoyChannel}, GuildID:${data.GuildID} `)
-							message.channel.send(`okay I changed the phrase I use to bully ${message.mentions.users.first().displayName} to: "${data.annoyString}"`)
+							console.log(`user overwriten: UserID: ${data.UserID}, annoyString:${data.annoyString}, annnoyChannel:${data.annoyChannel}, GuildID:${data.GuildID} `);
+							message.channel.send(`okay I changed the phrase I use to bully ${message.mentions.users.first().displayName} to: "${data.annoyString}" in channel:${ch}`);
 						} else
 						{
 							annoyAUserData.push(data);
@@ -129,7 +128,7 @@ client.on("messageCreate", function (message)
 							console.log(`new user to annoy was set: UserID: ${data.UserID}, annoyString:${data.annoyString}, annnoyChannel:${data.annoyChannel}, GuildID:${data.GuildID} `)
 						}
 					}
-					else if (args[0].toLowerCase() == "remove")
+					else if (args[0].toLowerCase().includes("remove"))
 					{// remove command----------------
 						if (annoyAUserData.some(data => data.UserID == message.mentions.users.first().id))
 						{
@@ -155,15 +154,18 @@ client.on("messageCreate", function (message)
 
 						//SaveFile(annoyAUserData); //save the array
 					}
-					else { message.channel.send(`argument 0(set / remove) was not valid you entered "${args[0].toLowerCase()}"`) }
+					else 
+					{
+						message.channel.send(`argument 0(set / remove) was not valid! you entered "${args[0].toLowerCase()}"`)
+					}
 
 				} catch (err)
 				{
 					message.channel.send("oops something went wrong!");
-					console.err(err);
+					console.error(err);
 				}
 			}
-
+			SaveConfigs();
 		}
 		else
 		{//SEND ANNOYING MESSAGES---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -175,21 +177,12 @@ client.on("messageCreate", function (message)
 					if (userData.annoyChannel == "-1" || message.channel.id == userData.annoyChannel)
 					{
 						message.reply(userData.annoyString);
-					} else
-					{
-						console.log("not the right channel to bully");
 					}
-
-
-				}
-				else
-				{
-					console.info(`nope ${message.author.id} does not exist inside the list of users`);
 				}
 			}
 			catch
 			{
-				console.err("error checking if user shoud be bullied");
+				console.error("error checking if user shoud be bullied");
 			}
 		}
 	}
@@ -213,13 +206,33 @@ client.on("messageCreate", function (message)
 	if (message.author.username = "bananatoast_")
 	{
 		message.channel.send(`oh hey banana  you want to save the config? sure why not`);
-		SaveConfigs()
+		SaveConfigs();
 	}
 });
 
+
+function LoadConfigs()
+{
+	fs.readFile('./bullyConfig.json', 'utf-8', function (err, data)
+	{
+		if (err)
+		{
+			console.error(err);
+		}
+		console.info("bullyConfig.json read");
+		try
+		{
+			annoyAUserData = JSON.parse(data);//JSON.parse(data);
+		} catch
+		{
+			console.log("error loading bullyconfig.json");
+		}
+	});
+}
+
 function SaveConfigs()
 {
-	fs.writeFile('./bullyConfig.json', annoyAUserData.toString(), function (err)
+	fs.writeFile('./bullyConfig.json', JSON.stringify(annoyAUserData, undefined, 2), function (err)
 	{
 		if (err)
 		{
