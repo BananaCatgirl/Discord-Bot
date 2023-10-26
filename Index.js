@@ -16,7 +16,6 @@ const client = new discord.Client({
 		]
 });
 client.login(botToken.BOT_TOKEN);
-//git credentials? v2
 
 client.on("ready", function (message)
 {
@@ -107,7 +106,7 @@ client.on("messageCreate", function (message)
 
 						const bullyString = commandBody.split('"')[1];//----------------------TODO: Fix adding actual message
 						console.log(`bully user with string:${bullyString}`);
-						const bullyChannel = "specify channel" || "-1" // get the channel from the message || -1 for any channel //TODO: actually implement channel
+						const bullyChannel = message.mentions.channels.first().id || "-1" // get the channel from the message || -1 for any channel //TODO: actually implement channel
 						// 	UserID: 2,
 						// 	annoyString: "wub wub",
 						// 	annoyChannel: "test2"
@@ -122,15 +121,37 @@ client.on("messageCreate", function (message)
 							index = annoyAUserData.findIndex(d => d.UserID == data.UserID);
 							annoyAUserData[index] = data;
 							console.log(`user overwriten: UserID: ${data.UserID}, annoyString:${data.annoyString}, annnoyChannel:${data.annoyChannel}, GuildID:${data.GuildID} `)
+							message.channel.send(`okay I changed the phrase I use to bully ${message.mentions.users.first().displayName} to: "${data.annoyString}"`)
 						} else
 						{
 							annoyAUserData.push(data);
+							message.channel.send(`okay from now on I will bully ${message.mentions.users.first().displayName} with the phrase:"${data.annoyString}"`)
 							console.log(`new user to annoy was set: UserID: ${data.UserID}, annoyString:${data.annoyString}, annnoyChannel:${data.annoyChannel}, GuildID:${data.GuildID} `)
 						}
 					}
 					else if (args[0].toLowerCase() == "remove")
 					{// remove command----------------
+						if (annoyAUserData.some(data => data.UserID == message.mentions.users.first().id))
+						{
+							//			{
+							// 				UserID: 3,
+							// 				annoyString: "annoy 3",
+							// 				annoyChannel: "test3",
+							// 			},
+							const index = annoyAUserData.findIndex(data => data.UserID == message.mentions.users.first().id)
+							if (annoyAUserData.length - 1 == index)
+							{
+								annoyAUserData[index].UserID = "-1";
+							} else
+							{
+								annoyAUserData[index] = annoyAUserData.pop();
+							}
 
+							message.channel.send(`I won't bully ${message.mentions.users.first().displayName} anymore on this server`);
+						} else
+						{
+							message.channel.send(" I am not currently bullying this user in this server");
+						}
 
 						//SaveFile(annoyAUserData); //save the array
 					}
@@ -150,8 +171,16 @@ client.on("messageCreate", function (message)
 			{
 				if (annoyAUserData.some(data => data.UserID == message.author.id))
 				{
-					const lol = annoyAUserData.find(s => s.UserID == message.author.id);
-					message.reply(lol.annoyString);
+					const userData = annoyAUserData.find(s => s.UserID == message.author.id);
+					if (userData.annoyChannel == "-1" || message.channel.id == userData.annoyChannel)
+					{
+						message.reply(userData.annoyString);
+					} else
+					{
+						console.log("not the right channel to bully");
+					}
+
+
 				}
 				else
 				{
@@ -171,16 +200,32 @@ client.on("messageCreate", function (message)
 	}
 });
 
-
-function SaveFile(data)
+client.on("messageCreate", function (message)
 {
-	fs.writeFile('/bullyConfig.json', data, function (err)
+	if (message.author.bot) return;
+	if (!message.content.startsWith(config.default_prefix)) return;
+
+	const commandBody = message.content.slice(config.default_prefix.length);
+	// const args = commandBody.split(' ');
+	const command = commandBody.toLowerCase();
+
+	if (command != "save_config") return;
+	if (message.author.username = "bananatoast_")
+	{
+		message.channel.send(`oh hey banana  you want to save the config? sure why not`);
+		SaveConfigs()
+	}
+});
+
+function SaveConfigs()
+{
+	fs.writeFile('./bullyConfig.json', annoyAUserData.toString(), function (err)
 	{
 		if (err)
 		{
-			console.log(err);
+			console.error(err);
 		}
-		console.log("bullyConfig.json saved");
+		console.warn("bullyConfig.json saved");
 	});
 }
 
