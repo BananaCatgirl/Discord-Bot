@@ -25,52 +25,7 @@ client.on("ready", function (message)
 });
 
 let annoyAUserData = [];
-//CURRENT:
-// {
-// 	UserID: 0,
-// 	annoyString: "lol",
-// 	annoyChannel: "test",
-//  GuildID: 19687
-// },
-//-----------------------------------
-//PLANED:
-//{
-//	Guild
-//	{
-//		ID:1,
-//		{
-//			{
-// 				UserID: 0,
-// 				annoyString: "annoy 0",
-// 				annoyChannel: "test0",
-// 			},
-//			{
-// 				UserID: 1,
-// 				annoyString: "annoy1",
-// 				annoyChannel: "test1",
-// 			},
-//		}
-//	}
-//	Guild
-//	{
-//		ID:2,
-//		{
-//			{
-// 				UserID: 3,
-// 				annoyString: "annoy 3",
-// 				annoyChannel: "test3",
-// 			},
-//			{
-// 				UserID: 1,
-// 				annoyString: "annoy1",
-// 				annoyChannel: "test1",
-// 			},
-//		}
-//	}
-//}
-
-
-
+let bullyStorage = [];
 //annoy specific users with a special sentence and maybe only in special channels
 //command: !bully set @user "phrase with space" channel(optional) minTimeBetweenMessages -- sets/overrides the bully command for a user "phrase can contain spaces" 
 //command: !bully remove @user -- removes the bully command of a user for the guild the message comes from
@@ -97,46 +52,66 @@ client.on("messageCreate", function (message)
 				{
 					if (args[0].toLowerCase().includes("set"))
 					{
-						const bullyString = commandBody.split('"')[1];//----------------------TODO: Fix adding actual message
+						const bullyString = commandBody.split('"')[1];
 						console.log(`bully user with string:${bullyString}`);
 						const bullyChannel = "-1";
 						if (message.mentions.channels.length > 0)
 						{
 							bullyChannel = message.mentions.channels.first().id // get the channel from the message || -1 for any channel
 						}
-						// 	UserID: 2,
-						// 	annoyString: "wub wub",
-						// 	annoyChannel: "test2"
 						let data = {
 							UserID: message.mentions.users.first().id,
 							annoyString: bullyString,
-							annoyChannel: bullyChannel,
-							GuildID: message.channel.guildId
+							annoyChannel: bullyChannel
 						};
-						const ch = "all channels";
-						if (data.annoyChannel != "-1") ch = data.annoyChannel;
+						const channel = "all channels";
+						if (data.annoyChannel != "-1") channel = data.annoyChannel;
+
+						//OLD LIST------
 						if (annoyAUserData.some(d => d.UserID == data.UserID))
 						{
 							index = annoyAUserData.findIndex(d => d.UserID == data.UserID);
 							annoyAUserData[index] = data;
-							console.log(`user overwriten: UserID: ${data.UserID}, annoyString:${data.annoyString}, annnoyChannel:${data.annoyChannel}, GuildID:${data.GuildID} `);
-							message.channel.send(`okay I changed the phrase I use to bully ${message.mentions.users.first().displayName} to: "${data.annoyString}" in channel:${ch}`);
+							message.channel.send(`okay I changed the phrase I use to bully ${message.mentions.users.first().displayName} to: "${data.annoyString}" in channel:${channel}`);
 						} else
 						{
 							annoyAUserData.push(data);
 							message.channel.send(`okay from now on I will bully ${message.mentions.users.first().displayName} with the phrase:"${data.annoyString}"`)
-							console.log(`new user to annoy was set: UserID: ${data.UserID}, annoyString:${data.annoyString}, annnoyChannel:${data.annoyChannel}, GuildID:${data.GuildID} `)
 						}
+						//OLD LIST END---------
+
+
+						if (bullyStorage.some(g => g.guildId == message.guildId))
+						{
+							const GuildIndex = bullyStorage.findIndex(g => g.guildId == message.guildId);
+							if (bullyStorage[GuildIndex].Users.some(u => u.UserID == data.UserID))
+							{
+								const UserIndex = bullyStorage[GuildIndex].Users.findIndex(u => u.UserID == data.UserID);
+								bullyStorage[GuildIndex].Users[UserIndex] = data;
+								console.log(`found User at Guildindex ${GuildIndex} with userIndex ${UserIndex}`);
+							} else
+							{
+								bullyStorage[GuildIndex].Users.push(data);
+								console.log(`bullystorage at specified Guildindex(${GuildIndex}) did not contain a user with that UserID:${data.UserID}`);
+							}
+						} else
+						{
+							let NewGuild = {
+								guildId: message.guild.id,
+								Users:
+									[
+										data,
+									]
+							};
+							bullyStorage.push(NewGuild);
+							console.log(`created new Guild Entry in bullystorage because no guild with specified id was found`);
+						}
+
 					}
 					else if (args[0].toLowerCase().includes("remove"))
-					{// remove command----------------
+					{
 						if (annoyAUserData.some(data => data.UserID == message.mentions.users.first().id))
 						{
-							//			{
-							// 				UserID: 3,
-							// 				annoyString: "annoy 3",
-							// 				annoyChannel: "test3",
-							// 			},
 							const index = annoyAUserData.findIndex(data => data.UserID == message.mentions.users.first().id)
 							if (annoyAUserData.length - 1 == index)
 							{
@@ -151,8 +126,6 @@ client.on("messageCreate", function (message)
 						{
 							message.channel.send(" I am not currently bullying this user in this server");
 						}
-
-						//SaveFile(annoyAUserData); //save the array
 					}
 					else 
 					{
@@ -171,17 +144,33 @@ client.on("messageCreate", function (message)
 		{//SEND ANNOYING MESSAGES---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			try
 			{
-				if (annoyAUserData.some(data => data.UserID == message.author.id))
+				const GuildIndex = bullyStorage.findIndex(guilds => guilds.guildId == message.guildId);
+				if (GuildIndex != -1)// is even any person registered to bully in this guild
 				{
-					const userData = annoyAUserData.find(s => s.UserID == message.author.id);
-					if (userData.annoyChannel == "-1" || message.channel.id == userData.annoyChannel)
+					const userIndex = bullyStorage[GuildIndex].Users.findIndex(u => u.UserID == message.author.id);
+					if (userIndex != -1)
 					{
-						message.reply(userData.annoyString);
+						const userData = bullyStorage[GuildIndex].Users[userIndex];
+						if (userData.annoyChannel == "-1" || message.channel.id == userData.annoyChannel)
+						{
+							message.reply(userData.annoyString);
+						} else
+						{
+							console.log("not the right channel")
+						};
+					} else
+					{
+						console.log("user not found in list to bully for this guild skipping");
 					}
 				}
+				else
+				{
+					console.log(`Guild does not exist in list. so no bully!`);
+				}
 			}
-			catch
+			catch (err)
 			{
+				console.error(err);
 				console.error("error checking if user shoud be bullied");
 			}
 		}
@@ -193,26 +182,41 @@ client.on("messageCreate", function (message)
 	}
 });
 
+//!save_config bananatoast only
 client.on("messageCreate", function (message)
 {
 	if (message.author.bot) return;
 	if (!message.content.startsWith(config.default_prefix)) return;
 
 	const commandBody = message.content.slice(config.default_prefix.length);
-	// const args = commandBody.split(' ');
 	const command = commandBody.toLowerCase();
 
 	if (command != "save_config") return;
 	if (message.author.username = "bananatoast_")
 	{
-		message.channel.send(`oh hey banana  you want to save the config? sure why not`);
+		message.channel.send(`oh hey banana! you want to save the config? sure why not`);
 		SaveConfigs();
 	}
 });
 
-
 function LoadConfigs()
 {
+	fs.readFile('./annoyConfig.json', 'utf-8', function (err, data)
+	{
+		if (err)
+		{
+			console.error(err);
+		}
+		console.info("annoyConfig.json read");
+		try
+		{
+			annoyAUserData = JSON.parse(data);//JSON.parse(data);
+		} catch
+		{
+			console.log("error loading annoyConfig.json");
+		}
+	});
+
 	fs.readFile('./bullyConfig.json', 'utf-8', function (err, data)
 	{
 		if (err)
@@ -222,7 +226,7 @@ function LoadConfigs()
 		console.info("bullyConfig.json read");
 		try
 		{
-			annoyAUserData = JSON.parse(data);//JSON.parse(data);
+			bullyStorage = JSON.parse(data);//JSON.parse(data);
 		} catch
 		{
 			console.log("error loading bullyconfig.json");
@@ -232,13 +236,24 @@ function LoadConfigs()
 
 function SaveConfigs()
 {
-	fs.writeFile('./bullyConfig.json', JSON.stringify(annoyAUserData, undefined, 2), function (err)
+	fs.writeFile('./bullyConfig.json', JSON.stringify(bullyStorage, undefined, 2), function (err)
 	{
 		if (err)
 		{
 			console.error(err);
 		}
-		console.warn("bullyConfig.json saved");
+		console.info("bullyConfig.json saved");
+	});
+
+
+
+	fs.writeFile('./annoyConfig.json', JSON.stringify(annoyAUserData, undefined, 2), function (err)
+	{
+		if (err)
+		{
+			console.error(err);
+		}
+		console.info("annoyConfig.json saved");
 	});
 }
 
