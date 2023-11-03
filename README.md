@@ -1,9 +1,8 @@
-# Discord-Bot
+# Installation
 
-You need to create a file called
+in the install directory create a File named:
+
 "TokenConfig.json"
-in the base directory where you put this:
 
-{
- "BOT_TOKEN": " your Bottoken here"
-}
+open it and paste this inside:
+{"BOT_TOKEN": " your Bottoken here"}

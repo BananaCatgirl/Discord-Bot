@@ -1,3 +1,4 @@
+const interface = require("app.js");
 const discord = require("discord.js");
 const fs = require("fs");
 const config = require("./config.json");
@@ -232,7 +233,7 @@ function kick(args, message)
 		{
 			if (message.mentions.users.first().bot)
 			{
-				message.channel.send("you can't kick a bot");
+				message.channel.send("you can't make me kick a bot");
 				return;
 			}
 			message.guild.members.kick(message.mentions.users.first().id, args.shift());
