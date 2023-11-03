@@ -121,93 +121,72 @@ function bully(args, command)
 	}
 	else
 	{
-		try
+
+		if (args[0].toLowerCase().includes("set"))
 		{
-			if (args[0].toLowerCase().includes("set"))
+			const bullyString = commandBody.split('"')[1];
+			console.log(`bully user with string:${bullyString}`);
+			const bullyChannel = "-1";
+			if (message.mentions.channels.length > 0)
 			{
-				const bullyString = commandBody.split('"')[1];
-				console.log(`bully user with string:${bullyString}`);
-				const bullyChannel = "-1";
-				if (message.mentions.channels.length > 0)
+				bullyChannel = message.mentions.channels.first().id // get the channel from the message || -1 for any channel
+			}
+			let data = {
+				UserID: message.mentions.users.first().id,
+				annoyString: bullyString,
+				annoyChannel: bullyChannel
+			};
+			const channel = "all channels";
+			if (data.annoyChannel != "-1") channel = data.annoyChannel;
+
+			if (bullyStorage.some(g => g.guildId == message.guildId))
+			{
+				const GuildIndex = bullyStorage.findIndex(g => g.guildId == message.guildId);
+				if (bullyStorage[GuildIndex].Users.some(u => u.UserID == data.UserID))
 				{
-					bullyChannel = message.mentions.channels.first().id // get the channel from the message || -1 for any channel
+					const UserIndex = bullyStorage[GuildIndex].Users.findIndex(u => u.UserID == data.UserID);
+					bullyStorage[GuildIndex].Users[UserIndex] = data;
+					console.log(`found User at Guildindex ${GuildIndex} with userIndex ${UserIndex}`);
+				} else
+				{
+					bullyStorage[GuildIndex].Users.push(data);
+					console.log(`bullystorage at specified Guildindex(${GuildIndex}) did not contain a user with that UserID:${data.UserID}`);
 				}
-				let data = {
-					UserID: message.mentions.users.first().id,
-					annoyString: bullyString,
-					annoyChannel: bullyChannel
+			} else
+			{
+				let NewGuild = {
+					guildId: message.guild.id,
+					Users:
+						[
+							data,
+						]
 				};
-				const channel = "all channels";
-				if (data.annoyChannel != "-1") channel = data.annoyChannel;
-
-				// //OLD LIST------
-				// if (annoyAUserData.some(d => d.UserID == data.UserID))
-				// {
-				// 	index = annoyAUserData.findIndex(d => d.UserID == data.UserID);
-				// 	annoyAUserData[index] = data;
-				// 	message.channel.send(`okay I changed the phrase I use to bully ${message.mentions.users.first().displayName} to: "${data.annoyString}" in channel:${channel}`);
-				// } else
-				// {
-				// 	annoyAUserData.push(data);
-				// 	message.channel.send(`okay from now on I will bully ${message.mentions.users.first().displayName} with the phrase:"${data.annoyString}"`)
-				// }
-				// //OLD LIST END---------
-
-
-				if (bullyStorage.some(g => g.guildId == message.guildId))
-				{
-					const GuildIndex = bullyStorage.findIndex(g => g.guildId == message.guildId);
-					if (bullyStorage[GuildIndex].Users.some(u => u.UserID == data.UserID))
-					{
-						const UserIndex = bullyStorage[GuildIndex].Users.findIndex(u => u.UserID == data.UserID);
-						bullyStorage[GuildIndex].Users[UserIndex] = data;
-						console.log(`found User at Guildindex ${GuildIndex} with userIndex ${UserIndex}`);
-					} else
-					{
-						bullyStorage[GuildIndex].Users.push(data);
-						console.log(`bullystorage at specified Guildindex(${GuildIndex}) did not contain a user with that UserID:${data.UserID}`);
-					}
-				} else
-				{
-					let NewGuild = {
-						guildId: message.guild.id,
-						Users:
-							[
-								data,
-							]
-					};
-					bullyStorage.push(NewGuild);
-					console.log(`created new Guild Entry in bullystorage because no guild with specified id was found`);
-				}
+				bullyStorage.push(NewGuild);
+				console.log(`created new Guild Entry in bullystorage because no guild with specified id was found`);
 			}
-			else if (args[0].toLowerCase().includes("remove"))
-			{
-				if (annoyAUserData.some(data => data.UserID == message.mentions.users.first().id))
-				{
-					const index = annoyAUserData.findIndex(data => data.UserID == message.mentions.users.first().id)
-					if (annoyAUserData.length - 1 == index)
-					{
-						annoyAUserData[index].UserID = "-1";
-					} else
-					{
-						annoyAUserData[index] = annoyAUserData.pop();
-					}
-
-					message.channel.send(`I won't bully ${message.mentions.users.first().displayName} anymore on this server`);
-				} else
-				{
-					message.channel.send(" I am not currently bullying this user in this server");
-				}
-			}
-			else 
-			{
-				message.channel.send(`argument 0(set / remove) was not valid! you entered "${args[0].toLowerCase()}"`)
-			}
-
-		} catch (err)
+		}
+		else if (args[0].toLowerCase().includes("remove"))
 		{
-			message.channel.send("oops something went wrong!");
-			console.error(err);
+			if (annoyAUserData.some(data => data.UserID == message.mentions.users.first().id))
+			{
+				const index = annoyAUserData.findIndex(data => data.UserID == message.mentions.users.first().id)
+				if (annoyAUserData.length - 1 == index)
+				{
+					annoyAUserData[index].UserID = "-1";
+				} else
+				{
+					annoyAUserData[index] = annoyAUserData.pop();
+				}
+
+				message.channel.send(`I won't bully ${message.mentions.users.first().displayName} anymore on this server`);
+			} else
+			{
+				message.channel.send(" I am not currently bullying this user in this server");
+			}
+		}
+		else 
+		{
+			console.log(`invallid argument for remove command`);
 		}
 	}
 	SaveConfigs();
