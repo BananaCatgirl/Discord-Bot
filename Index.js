@@ -1,4 +1,4 @@
-const interface = require("app.js");
+const interface = require("./app.js");
 const discord = require("discord.js");
 const fs = require("fs");
 const config = require("./config.json");
