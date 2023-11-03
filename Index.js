@@ -1,4 +1,3 @@
-const interface = require("./app.js");
 const discord = require("discord.js");
 const fs = require("fs");
 const config = require("./config.json");
@@ -203,11 +202,12 @@ function LoadConfigs()
 		if (err)
 		{
 			console.error(err);
+			console.info("bullyConfig.json had a problem reading");
 		}
-		console.info("bullyConfig.json read");
 		try
 		{
 			bullyStorage = JSON.parse(data);//JSON.parse(data);
+			console.log(`read bullyconfig.json`);
 		} catch
 		{
 			console.log("error loading bullyconfig.json");
@@ -221,6 +221,7 @@ function SaveConfigs()
 		if (err)
 		{
 			console.error(err);
+			console.log(`error saving bullyconfig.json`);
 		}
 		console.info("bullyConfig.json saved");
 	});
