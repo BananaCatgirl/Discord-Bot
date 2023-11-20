@@ -27,7 +27,7 @@ client.on("ready", function (message)
 	client.user.setActivity("!help", { type: discord.ActivityType.Playing });
 });
 
-client.on("messageCreate", function (message)
+client.on("messageCreate", async function (message)
 {
 	if (message.author.bot) return;
 	if (!message.content.startsWith(config.default_prefix)) return;
@@ -95,6 +95,7 @@ client.on("messageCreate", function (message)
 		console.err(err);
 	}
 });
+
 
 //---functions----------------------------------------------------------------------
 function help(args, message)
