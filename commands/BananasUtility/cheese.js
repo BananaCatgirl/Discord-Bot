@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
+const CHEESE_Tenor = "https://media.tenor.com/Psy7Fy33mk0AAAAC/cheese.gif";
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("cheese")
@@ -10,22 +12,8 @@ module.exports = {
 			.setColor("Yellow")
 			.setTitle("CHEESE!")
 			.setDescription("Cheese is Great!")
-			.setImage(config.CHEESE_Tenor);
-		await interaction.send({ embeds: [embed] });
+			.setImage(CHEESE_Tenor);
+		await interaction.reply({ embeds: [embed] });
 		// await interaction.react("🧀");
 	}
 }
-
-// if (message.author.bot) return;
-
-// if (message.content.toLowerCase().includes("cheese"))
-// {
-// 	message.react("🧀");
-
-// 	if (message.content.startsWith("!"))
-// 	{
-// 		const embedGif = new discord.Embed();
-// 		embedGif.image
-// 		message.channel.send(config.CHEESE_Tenor);
-// 	}
-// }

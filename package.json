@@ -8,8 +8,17 @@
     "log4js": "^6.9.1"
   },
   "scripts": {
+    "start_linux": "node Index.js",
+    "start_windows": "node Index.js",
+    "start_dev": "nodemon Index.js",
+    "first_setup": "node create_config.js",
+    "deploy_commands": "node deploy_commands.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Bananatoast",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "nodemon": "^3.0.2"
+  }
 }
