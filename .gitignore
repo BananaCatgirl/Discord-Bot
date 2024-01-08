@@ -2,3 +2,5 @@ config.json
 TokenConfig.json
 bullyConfig.json
 annoyConfig.json
+node_modules/
+node_modules/*
