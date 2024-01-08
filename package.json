@@ -5,7 +5,8 @@
   "main": "Index.js",
   "dependencies": {
     "discord.js": "^14.13.0",
-    "log4js": "^6.9.1"
+    "log4js": "^6.9.1",
+    "mongodb": "^6.3.0"
   },
   "scripts": {
     "start_linux": "node Index.js",
