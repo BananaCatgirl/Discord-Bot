@@ -1,7 +1,11 @@
+require(`dotenv`).config();
 const fs = require(`node:fs`);
 const path = require(`node:path`);
+const mongoose = require(`mongoose`);
 const { Client, Collection, GatewayIntentBits } = require(`discord.js`);
-const { token } = require(`./config.json`);
+
+
+// console.log(`env mongo:` + process.env.mongodb);
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -48,4 +52,5 @@ for (const file of eventFiles)
 	}
 }
 
-client.login(token);
+mongoose.connect(process.env.mongodb);
+client.login(process.env.bottoken);

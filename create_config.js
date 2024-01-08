@@ -1,11 +1,11 @@
 const fs = require(`node:fs`);
 
 const configTemp =
-	`
-{
+	`{
 	"clientId": " client id here ",
 	"guildId": "your guild id here",
-	"token": " your token here "
+	"token": " your token here ",
+	"mongoDB" : "mongoDB url Here"
 }`;
 
 if (!fs.existsSync(`config.json`))
@@ -17,4 +17,14 @@ if (!fs.existsSync(`config.json`))
 else
 {
 	console.log(`config.json file already exists skipping`);
+}
+
+if (!fs.existsSync(`environment.env`))
+{
+	console.log(`.env does not exist, Creating!`);
+	fs.writeFileSync(`.env`, ``);
+}
+else
+{
+	console.log(`File already exists, skipping!`);
 }
